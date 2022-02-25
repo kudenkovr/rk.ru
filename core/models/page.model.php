@@ -10,4 +10,10 @@ class Page extends \Engine\Model {
 		return $res->fetch_assoc();
 	}
 	
+	public function getPageById($id) {
+		$id = (int) $id;
+		$res = $this->db->query("SELECT * FROM rk_pages WHERE id='$id'");
+		return $res->fetch_assoc();
+	}
+	
 }
