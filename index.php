@@ -4,9 +4,7 @@ echo '<pre>';
 
 include 'core/init.php';
 
-// print_r($rk);
-$p = $rk->invoke('page');
-print_r($p->getPageByUri());
+$c = $rk->run('page');
 
 echo '</pre>';
 

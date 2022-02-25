@@ -7,6 +7,7 @@ class RK {
 	public $data;
 	public $config;
 	public $path;
+	public $request;
 	public $router;
 	public $db;
 	protected $_log = array();
@@ -18,9 +19,8 @@ class RK {
 		
 		$this->path = new Engine\Path;
 		$this->config = new Engine\Registry;
+		$this->request = new Engine\Request;
 		$this->router = new Engine\Router;
-		
-		// $this->request = $this->getModule('request');
 		
 		
 		// file_put_contents($this->path->core . 'log.txt', '');
@@ -50,9 +50,7 @@ class RK {
 	
 	
 	public function log($string) {
-		// $this->_log = file_get_contents($this->path->core . 'log.txt');
 		array_push($this->_log, '[' . date("Y-m-d H:i:s") . '] ' . $string);
-		// file_put_contents($this->path->core . 'log.txt', $log);
 	}
 	
 	
@@ -113,9 +111,9 @@ class RK {
 		$method = 'action' . ucfirst(array_pop($parts));
 		$name = implode('\\', $parts);
 		$class = 'Controller\\' . $name;
-		$filename = $this->path->getFilename('controller', $name . $this->config->ext['class']);
-		if (!file_exists($filename)) {
-			if ($method == 'actionIndex') trigger_error("Action \"$action\" not found in $filename", E_USER_ERROR);
+		$filename = $this->path->getFilename('controller', $name . $this->config->ext['controller']);
+		if (empty($filename)) {
+			if ($method == 'actionIndex') trigger_error("Action \"$action\" not found in \"$filename\"", E_USER_ERROR);
 			$action .= '/index';
 			return $this->run($action, $data);
 		}
@@ -152,10 +150,7 @@ class RK {
 	} */
 	
 	
-	/* public function invoke($name) {
-		$rk_class = get_called_class();
-		$namesep = $rk_class::NAMESEP;
-		$dirsep  = $rk_class::DIRSEP;
+	public function invoke($name) {
 		$namespace = str_replace($namesep, '\\', $name) . '\\';
 		$dir = $this->config->path['core'] . str_replace($namesep, $dirsep, $name) . $dirsep;
 		$mFile = $dir . 'model' . $this->config->ext_class;
@@ -176,7 +171,7 @@ class RK {
 			trigger_error("Invoke <b>$name</b> failed ($cFile)", E_USER_ERROR);
 		}
 		return $controller;
-	} */
+	}
 	
 	
 	public function output() {

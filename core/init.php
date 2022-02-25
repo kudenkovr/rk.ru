@@ -19,9 +19,9 @@ $rk = new RK;
 		
 $rk->path->set('base', $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR);
 $rk->path->set('core', __DIR__);
-$rk->path->set('config', $rk->path->core . 'config/');
+// $rk->path->set('config', $rk->path->core . 'config/');
 
-$rk->loadConfig('config_paths.php', 'path');
+$rk->loadConfig('paths.php', 'path');
 $rk->loadConfig('config.ini'); // 'config' is default property
 $rk->loadConfig('mysql.ini'); // 'config' is default property
 $rk->loadConfig('info.ini', 'data');

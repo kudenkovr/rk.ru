@@ -30,12 +30,14 @@ class Registry {
 	
 	
 	public function get($key) {
-		return $this->$key;
+		if ($this->has($key)) {
+			return $this->$key;
+		} else return null;
 	}
 	
 	
 	public function has($key) {
-		return isset($this->$key);
+		return property_exists($this, $key);
 	}
 	
 	

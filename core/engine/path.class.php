@@ -53,15 +53,21 @@ class Path {
 		if (array_key_exists($path_key, $this->_data)) {
 			foreach ($this->_data[$path_key] as $path) {
 				$file_path = $this->normalize($path . $file_name);
+				// echo $file_path . PHP_EOL; 
 				if (file_exists($file_path)) {
 					return $file_path;
 				}
 			}
-			// from $path->base:
-			$file_path = $this->normalize($this->get('base') . $file_name);
-			if (file_exists($file_path)) {
-				return $file_path;
-			}
+		}
+		// from $rk->path->core:
+		$file_path = $this->normalize($this->get('core') . $file_name);
+		if (file_exists($file_path)) {
+			return $file_path;
+		}
+		// from $rk->path->base:
+		$file_path = $this->normalize($this->get('base') . $file_name);
+		if (file_exists($file_path)) {
+			return $file_path;
 		}
 		return false;
 	}
