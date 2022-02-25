@@ -1,0 +1,31 @@
+<filesmatch ".(htaccess|md|gitignore)$">
+    deny from all
+</filesmatch>
+
+RewriteEngine on
+RewriteBase /
+
+# http:// -> https://
+# RewriteCond %{SERVER_PORT} !^443$
+# RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]
+
+# Rewrite www.domain.com -> domain.com -- used with SEO Strict URLs plugin
+# RewriteCond %{HTTP_HOST} ^www.domain.com$ [NC]
+# RewriteRule ^(.*)$ https://domain.com/$1 [R=301,L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !.*\.(ico|gif|jpg|jpeg|png|js|css)
+RewriteRule ^([^?]*) index.php [L,QSA]
+
+# Parse file as .php
+AddHandler application/x-httpd-php .tpl
+
+# Stronger Cache
+FileETag MTime Size
+<ifmodule mod_expires.c>
+  <filesmatch ".(jpg|jpeg|gif|png|ico|css|js)$">
+    ExpiresActive on
+    ExpiresDefault "access plus 1 year"
+  </filesmatch>
+</ifmodule>
