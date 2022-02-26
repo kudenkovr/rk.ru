@@ -118,24 +118,8 @@ class RK {
 		$controller = new $class;
 		
 		// load Model
-		$file = $this->path->getFilename('model', $spirit . $this->config->ext['model']);
-		if (file_exists($file)) {
-			$class = 'Model\\' . str_replace($namesep, '\\', $spirit);
-			require_once $file;
-		} else {
-			$class = $this->config->default['model'];
-		}
-		$controller->model = new $class($data);
-		
-		// load View
-		$file = $this->path->getFilename('view', $spirit . $this->config->ext['view']);
-		if (file_exists($file)) {
-			$class = 'View\\' . str_replace($namesep, '\\', $spirit);
-			require_once $file;
-		} else {
-			$class = $this->config->default['model'];
-		}
-		$controller->view = new $class($controller->model);
+		$controller->setView($spirit);
+		$controller->setModel($spirit, $data);
 		
 		// load Template
 		$controller->view->setTemplate($spirit);
@@ -200,7 +184,10 @@ class RK {
 	
 	
 	public function output() {
-		echo ob_get_clean();
+		// >> process tags: [[+request.uri]] ...
+		$output = ob_get_clean();
+		$output = str_replace('[[+version]]', $this->info['version'], $output);
+		echo $output;
 	}
 	
 }
