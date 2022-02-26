@@ -34,6 +34,28 @@ class RK {
 	public static function _() { return RK::$_self; }
 	
 	
+	public function get($alias) {
+		$parts = (is_string($alias)) ? explode('.', $alias) : $alias;
+		$object = $this;
+		// data
+		$key = $parts[0];
+		if (!property_exists($object, $key)) array_unshift($parts, 'data');
+		
+		while (!empty($parts)) {
+			$key = array_shift($parts);
+			if (is_array($object)) {
+				$object = $object[$key];
+			} elseif (is_object($object)) {
+				$object = $object->$key;
+			} else {
+				return null;
+			}
+		}
+		
+		return $object;
+	}
+	
+	
 	public function __get($key) {
 		return $this->data->get($key);
 	}
