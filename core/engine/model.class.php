@@ -19,7 +19,7 @@ class Model extends Registry {
 	
 	
 	public function set($key, $value=null) {
-		// if ($this->_strict && is_string($key) && !$this->has($key)) return null;
+		if ($this->_strict && is_string($key) && !$this->has($key)) return null;
 		parent::set($key, $value);
 	}
 	
