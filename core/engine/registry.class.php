@@ -16,7 +16,11 @@ class Registry {
 				// setObject()
 				$this->$key->set($value);
 			} else {
-				$this->$key = $value;
+				// set value
+				$setter = 'set' . ucfirst(strtolower($key));
+				if (method_exists($this, $setter)) {
+					$this->$setter($key, $value);
+				} else $this->$key = $value;
 			}
 		}
 	}
@@ -30,10 +34,21 @@ class Registry {
 	
 	
 	public function get($key) {
-		if ($this->has($key)) {
+		$getter = 'get' . ucfirst(strtolower($key));
+		if (method_exists($this, $getter)) {
+			return $this->$getter();
+		} elseif ($this->has($key)) {
 			return $this->$key;
 		} else return null;
 	}
+	
+	
+	public function __get($key) {
+		return $this->get($key);
+	}
+	
+	
+	public function getTest() { return 'Ammmmezing testing!'; }
 	
 	
 	public function has($key) {
