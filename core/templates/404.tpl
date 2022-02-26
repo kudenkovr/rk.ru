@@ -32,8 +32,8 @@
 
 <body>
 	<!-- <a href=//<?=$rk->request->domain?>><span id=logo aria-label="RK Light"></span></a> -->
-	<h1>RK Light v<?=$rk->info['version']?></h1>
+	<h1>RK Light v[[+info.version]]</h1>
 	<p><b>404.</b> <ins>That’s an error.</ins></p>
-	<p>The requested URL <code><b><?=$rk->request->url?></b></code> was not found on this server.  <ins>That’s all we know.</ins></p>
+	<p>The requested URL <code><b>[[+request.url]]</b></code> was not found on this server.  <ins>That’s all we know.</ins></p>
 </body>
 </html>

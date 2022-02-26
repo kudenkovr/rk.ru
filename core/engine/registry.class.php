@@ -48,9 +48,6 @@ class Registry {
 	}
 	
 	
-	public function getTest() { return 'Ammmmezing testing!'; }
-	
-	
 	public function has($key) {
 		return property_exists($this, $key);
 	}

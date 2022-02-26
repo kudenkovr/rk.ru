@@ -34,16 +34,22 @@ class RK {
 	public static function _() { return RK::$_self; }
 	
 	
-	public function get($alias) {
+	public function get($alias, $object = null) {
 		$parts = (is_string($alias)) ? explode('.', $alias) : $alias;
-		$object = $this;
-		// data
-		$key = $parts[0];
-		if (!property_exists($object, $key)) array_unshift($parts, 'data');
+		
+		if (is_null($object)) {
+			$object = $this;
+			$key = $parts[0];
+			if (!property_exists($object, $key)) array_unshift($parts, 'data');
+		}
 		
 		while (!empty($parts)) {
 			$key = array_shift($parts);
 			if (is_array($object)) {
+				if (!array_key_exists($key, $object)) {
+					$this->log("Alias '" . $alias . "' is not exists");
+					return null;
+				}
 				$object = $object[$key];
 			} elseif (is_object($object)) {
 				$object = $object->$key;
@@ -208,6 +214,11 @@ class RK {
 	public function output() {
 		// >> process tags: [[+request.uri]] ...
 		$output = ob_get_clean();
+		
+		$output = preg_replace_callback('@\[\[\+([a-z0-9\._]+)\]\]@i', function($matches) {
+			return RK::self()->get($matches[1]);
+		}, $output);
+		
 		$output = str_replace('[[+version]]', $this->info['version'], $output);
 		echo $output;
 	}
