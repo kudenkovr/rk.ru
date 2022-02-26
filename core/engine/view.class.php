@@ -4,7 +4,7 @@ use RK;
 
 
 class View {
-	public $rk;
+	// public $rk;
 	public $model;
 	
 	protected $_layout;
@@ -13,27 +13,27 @@ class View {
 	protected $_blocks=array();
 	
 	public function __construct($model) {
-		$this->rk = RK::self();
+		// $this->rk = RK::self();
 		$this->model = $model;
 		$this->model->styles = array();
 		$this->model->scripts = array();
 	}
 	
 	public function setLayout($file) {
-		$ext = $this->rk->config->ext_template;
-		$this->_layout = $this->rk->path->getFilename('templates', $file.$ext);
+		$ext = RK::self()->config->ext_template;
+		$this->_layout = RK::self()->path->getFilename('templates', $file.$ext);
 		return $this;
 	}
 	
 	public function setTemplate($file) {
-		$ext = $this->rk->config->ext_template;
-		$this->_template = $this->rk->path->getFilename('template', $file.$ext);
+		$ext = RK::self()->config->ext['template'];
+		$this->_template = RK::self()->path->getFilename('template', $file.$ext);
 		return $this;
 	}
 	
 /* 	public function render($data=array()) {
 		if (empty($this->_template)) return null;
-		$rk = $this->rk;
+		$rk = RK::self();
 		extract($this->model->toArray());
 		extract((array)$data);
 		ob_start();
@@ -54,7 +54,7 @@ class View {
 			$data = $layout;
 			$layout = null;
 		}
-		$rk = $this->rk;
+		$rk = RK::self();
 		$template .= $rk->config->ext_template;
 		if (is_string($layout)) {
 			$layout = $rk->path->getFilename('template', $layout.$rk->config->ext_template);

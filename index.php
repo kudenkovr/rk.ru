@@ -4,7 +4,9 @@ echo '<pre>';
 
 include 'core/init.php';
 
-$c = $rk->run('page');
+$rk->run('page');
+$rk->output();
+// print_r($c);
 
 echo '</pre>';
 
