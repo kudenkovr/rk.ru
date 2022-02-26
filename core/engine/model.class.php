@@ -23,4 +23,14 @@ class Model extends Registry {
 		parent::set($key, $value);
 	}
 	
+	
+	public function select($query) {
+		$res = $this->db->query($query);
+		$output = array();
+		while($row = $res->fetch_assoc()) {
+			$output[$row['id']] = $row;
+		}
+		return $output;
+	}
+	
 }

@@ -8,10 +8,15 @@ class Page extends \Engine\Controller {
 	public function actionIndex() {
 		$rk = RK::self();
 		$this->model->getPageByUri($rk->request->uri);
-		if (empty($this->model->id)) {
+		/* if (empty($this->model->id)) {
 			return $this->action404();
-		}
+		} */
 		$this->output();
+	}
+	
+	
+	public function actionBlog() {
+		print_r($this); exit;
 	}
 	
 	
