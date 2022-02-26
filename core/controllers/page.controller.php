@@ -9,7 +9,7 @@ class Page extends \Engine\Controller {
 		$rk = RK::self();
 		$this->model->getPageByUri($rk->request->uri);
 		if (empty($this->model->id)) {
-			return $this->action404();
+			return false;
 		}
 		$this->output();
 	}
@@ -17,7 +17,7 @@ class Page extends \Engine\Controller {
 	
 	public function action404() {
 		header("HTTP/1.1 404 Not Found");
-		$this->view->setTemplate('404');
+		$this->view->setTemplate(RK::self()->config->default['page404']);
 		$this->output();
 	}
 	

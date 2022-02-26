@@ -1,19 +1,19 @@
 <?php
 namespace Engine;
+use RK;
 
 
 class Router extends Model {
 	
 	public function route($routes) {
-		$uri = trim(explode('?', $_SERVER['REQUEST_URI'])[0], '/');
-		if ($uri==='') $uri = '/'; // FIX start page url
+		$uri = trim(RK::self()->request->uri, '/');
 		foreach($routes as $route) {
 			$rule = $route['rule'];
 			$action = $route['action'];
 			$data = array();
 			
 			// Check ajax queries
-			if (array_key_exists('ajax', $route) && $route['ajax'] != $this->rk->request->isAjax()) continue;
+			if (array_key_exists('ajax', $route) && $route['ajax'] != RK::self()->request->is_ajax) continue;
 			
 			// Check $_GET, $_POST, $_REQUEST
 			$next = false;
@@ -27,7 +27,6 @@ class Router extends Model {
 					$data = array_replace_recursive($data, $_);
 				}
 			}
-			
 			if ($next) continue;
 			
 			$result = preg_match('@^'.$rule.'$@i', $uri, $matches);
@@ -41,16 +40,17 @@ class Router extends Model {
 						$data[$i] = $match;
 					}
 				}
-				echo $this->rk->run($action, $data);
-				return true;
+				if (RK::self()->run($action, $data) !== false) {
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 	
 	
-	public function checkRequest($array, $var='request') {
-		$var =& $this->rk->request->$var;
+	public function checkRequest(&$array, $var='request') {
+		$var =& RK::self()->request->$var;
 		$data = array();
 		foreach ($array as $key => $regexp) {
 			if (!array_key_exists($key, $var)) return false;
@@ -62,7 +62,7 @@ class Router extends Model {
 	
 	
 	public function routeFile($file) {
-		$config = $this->rk->getConfig($file);
+		$config = RK::self()->getConfig($file);
 		$routes = array();
 		foreach($config as $rule => $action) {
 			if (is_string($action)) {
