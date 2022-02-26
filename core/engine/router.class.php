@@ -6,7 +6,7 @@ use RK;
 class Router extends Model {
 	
 	public function route($routes) {
-		$uri = RK::self()->request->uri;
+		$uri = trim(RK::self()->request->uri, '/');
 		foreach($routes as $route) {
 			$rule = $route['rule'];
 			$action = $route['action'];
@@ -40,15 +40,16 @@ class Router extends Model {
 						$data[$i] = $match;
 					}
 				}
-				RK::self()->run($action, $data);
-				return true;
+				if (RK::self()->run($action, $data) !== false) {
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 	
 	
-	public function checkRequest($array, $var='request') {
+	public function checkRequest(&$array, $var='request') {
 		$var =& RK::self()->request->$var;
 		$data = array();
 		foreach ($array as $key => $regexp) {
@@ -72,7 +73,6 @@ class Router extends Model {
 				break;
 			}
 		}
-		// print_r($routes);exit;
 		return $this->route($routes);
 	}
 	

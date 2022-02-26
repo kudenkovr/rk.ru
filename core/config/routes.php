@@ -4,15 +4,7 @@ $_[] = [
 	'action' => 'page/index',
 ];
 $_[] = [
-	'rule' => 'blog',
-	'action' => 'page/blog',
-];
-$_[] = [
-	'rule' => 'blog/.+',
-	'action' => 'page/blog',
-];
-$_[] = [
-	'rule' => '[^/].+',
+	'rule' => '[^/]+',
 	'action' => 'page/index',
 ];
 $_[] = [

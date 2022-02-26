@@ -8,6 +8,11 @@ class Request extends Registry {
 	public $protocol = 'http://';
 	public $url;
 	
+	public $request;
+	public $get;
+	public $post;
+	
+	
 	public function __construct() {
 		$this->is_ajax = /* (int)  */(isset($_SERVER['HTTP_X_REQUESTED_WITH'])
 						&& !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
@@ -18,10 +23,10 @@ class Request extends Registry {
 		if (empty($this->uri)) $this->uri = '/';
 		$this->protocol = $_SERVER['HTTP_X_FORWARDED_PROTO'] . '://';
 		$this->url = $this->protocol . $this->domain . $uri[0];
-		// $this->request = $_REQUEST;
-		// $this->set($_REQUEST);
-		// $this->set('get', $_GET);
-		// $this->set('post', $_POST);
+		
+		$this->request =& $_REQUEST;
+		$this->get =& $_GET;
+		$this->post =& $_POST;
 	}
 	
 }
