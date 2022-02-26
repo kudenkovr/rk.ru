@@ -30,6 +30,8 @@ class RK {
 	}
 	
 	public static function self() { return RK::$_self; }
+	// alias
+	public static function _() { return RK::$_self; }
 	
 	
 	public function __get($key) {
@@ -105,21 +107,68 @@ class RK {
 	}
 	
 	
-	// getController
-	public function run($action, $data=array()) {
-		$parts = explode('/', $action);
-		$method = 'action' . ucfirst(array_pop($parts));
-		$name = implode('\\', $parts);
-		$class = 'Controller\\' . $name;
-		$filename = $this->path->getFilename('controller', $name . $this->config->ext['controller']);
-		if (empty($filename)) {
-			if ($method == 'actionIndex') trigger_error("Action \"$action\" not found in \"$filename\"", E_USER_ERROR);
-			$action .= '/index';
-			return $this->run($action, $data);
-		}
-		require_once($filename);
+	public function invoke($spirit, $data=array()) {
+		$namesep = $this->config->default['namesep'];
+		
+		// load Controller
+		$file = $this->path->getFilename('controller', $spirit . $this->config->ext['controller']);
+		if (!file_exists($file)) return false;
+		require_once $file;
+		$class = 'Controller\\' . str_replace($namesep, '\\', $spirit);
 		$controller = new $class;
-		return $controller->$method($data);
+		
+		// load Model
+		$file = $this->path->getFilename('model', $spirit . $this->config->ext['model']);
+		if (file_exists($file)) {
+			$class = 'Model\\' . str_replace($namesep, '\\', $spirit);
+			require_once $file;
+		} else {
+			$class = $this->config->default['model'];
+		}
+		$controller->model = new $class($data);
+		
+		// load View
+		$file = $this->path->getFilename('view', $spirit . $this->config->ext['view']);
+		if (file_exists($file)) {
+			$class = 'View\\' . str_replace($namesep, '\\', $spirit);
+			require_once $file;
+		} else {
+			$class = $this->config->default['model'];
+		}
+		$controller->view = new $class($controller->model);
+		
+		// load Template
+		$controller->view->setTemplate($spirit);
+		
+		return $controller;
+	}
+	
+	
+	// (new Controller\spirit_name)->run($spirit_controller_action)
+	// $rk->run([spirit_name]/[spirit_controller_action])
+	public function run($call, $data=array()) {
+		// Rip Action
+		$pos = strrpos($call, $this->config->default['namesep']);
+		if ($pos !== false) {
+			$spirit = substr($call, 0, $pos);
+			$action = substr($call, $pos+1);
+		} else {
+			$spirit = $call;
+			$action = $this->config->default['action'];
+		}
+		// echo "$call: {$spirit}->{$action}();";exit;
+		
+		// invoke
+		$controller = $this->invoke($spirit, $data);
+		
+		// check for exists file and non-action call
+		if ($controller === false) {
+			if ($action == $this->config->default['action']) return $this->log("Action \"$action\" is not valid");
+			else return $this->run($call . '/' . $this->config->default['action'], $data);
+		}
+		
+		return $controller->run($action, $data);
+		
 	}
 	
 	
@@ -150,32 +199,8 @@ class RK {
 	} */
 	
 	
-	public function invoke($name) {
-		$namespace = str_replace($namesep, '\\', $name) . '\\';
-		$dir = $this->config->path['core'] . str_replace($namesep, $dirsep, $name) . $dirsep;
-		$mFile = $dir . 'model' . $this->config->ext_class;
-		$vFile = $dir . 'view' . $this->config->ext_class;
-		$cFile = $dir . 'controller' . $this->config->ext_class;
-		if (file_exists($mFile)) {
-			require_once($mFile);
-			$model_class = $namespace . 'Model';
-			$model = new $model_class;
-		} else {
-			$model = new Engine\Model;
-		}
-		if (file_exists($cFile)) {
-			require_once($cFile);
-			$controller_class = $namespace . 'Controller';
-			$controller = new $controller_class($model);
-		} else {
-			trigger_error("Invoke <b>$name</b> failed ($cFile)", E_USER_ERROR);
-		}
-		return $controller;
-	}
-	
-	
 	public function output() {
-		return ob_get_clean();
+		echo ob_get_clean();
 	}
 	
 }

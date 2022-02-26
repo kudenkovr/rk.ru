@@ -1,16 +1,36 @@
 <?php
 namespace Engine;
+use RK;
 
 
 class Controller {
-	protected $rk;
+	// protected $rk;
 	public $model;
 	public $view;
 	
 	
-	public function __construct() {
-		$this->rk = \RK::self();
+	// public function __construct($data = array()) {
+		// $this->rk = \RK::self();
+	// }
+	
+	
+	public function setModel($model) {
+		
 	}
+	
+	
+	public function run($action, $data=array()) {
+		$method = 'action' . ucfirst($action);
+		if (method_exists($this, $method)) {
+			return $this->$method($data);
+		}
+	}
+	
+	
+	public function __get($key) {
+		return $this->model->get($key);
+	}
+	
 	
 	/* 
 	public function get($key) {
@@ -19,11 +39,6 @@ class Controller {
 		} else {
 			return $this->rk->get($key);
 		}
-	}
-	
-	
-	public function __get($key) {
-		return $this->get($key);
 	} */
 	
 }

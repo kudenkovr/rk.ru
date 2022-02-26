@@ -1,18 +1,15 @@
 <?php
 namespace Controller;
+use RK;
 
 
 class Page extends \Engine\Controller {
 	
-	public function __construct() {
-		parent::__construct();
-		$this->model = $this->rk->getModel('page');
-	}
-	
-	
 	public function actionIndex() {
-		$this->model->getPageByUri($this->rk->request->uri);
-		// print_r($this->model);
+		$rk = RK::self();
+		$this->model->getPageByUri($rk->request->uri);
+		extract($this->model->toArray());
+		echo "#$id. $title\r\n";
 	}
 	
 }
