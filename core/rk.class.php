@@ -34,7 +34,7 @@ class RK {
 	public static function _() { return RK::$_self; }
 	
 	
-	public function get($alias, $object = null) {
+	public function getAlias($alias, $object = null) {
 		$parts = (is_string($alias)) ? explode('.', $alias) : $alias;
 		
 		if (is_null($object)) {
@@ -59,6 +59,13 @@ class RK {
 		}
 		
 		return $object;
+	}
+	
+	
+	public function processVars(&$string, $object=null) {
+		$string = preg_replace_callback('@\[\[\+([a-z0-9\._]+)\]\]@i', function($matches) use ($object) {
+			return RK::self()->getAlias($matches[1], $object);
+		}, $string);
 	}
 	
 	
@@ -215,11 +222,8 @@ class RK {
 		// >> process tags: [[+request.uri]] ...
 		$output = ob_get_clean();
 		
-		$output = preg_replace_callback('@\[\[\+([a-z0-9\._]+)\]\]@i', function($matches) {
-			return RK::self()->get($matches[1]);
-		}, $output);
+		$this->processVars($output, $this);
 		
-		$output = str_replace('[[+version]]', $this->info['version'], $output);
 		echo $output;
 	}
 	
