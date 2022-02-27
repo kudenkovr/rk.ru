@@ -2,10 +2,10 @@
 
 <html lang="ru">
 <head>
-	<title><?=$title?></title>
+	<title>[[+title]]</title>
 </head>
 
 <body>
-	<div><?=$content?></div>
+	<div>[[+content]]</div>
 </body>
 </html>

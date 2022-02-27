@@ -22,13 +22,15 @@ class View {
 		if (empty($this->_template)) return false;
 		
 		// delegate vars
-		$rk = RK::self();
-		$model = $this->model;
-		extract($model->toArray());
+		// $rk = RK::self();
+		// $model = $this->model;
+		// extract($model->toArray());
 		
 		// include template
 		ob_start();
 		include $this->_template;
-		return ob_get_clean();
+		$output = ob_get_clean();
+		RK::self()->processVars($output, $this->model);
+		return $output;
 	}
 }

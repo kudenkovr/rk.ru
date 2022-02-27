@@ -7,6 +7,7 @@ class Router extends Model {
 	
 	public function route($routes) {
 		$uri = trim(RK::self()->request->uri, '/');
+		if (empty($uri)) $uri = '/';
 		foreach($routes as $route) {
 			$rule = $route['rule'];
 			$action = $route['action'];

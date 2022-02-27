@@ -34,6 +34,41 @@ class RK {
 	public static function _() { return RK::$_self; }
 	
 	
+	public function getAlias($alias, $object = null) {
+		$parts = (is_string($alias)) ? explode('.', $alias) : $alias;
+		
+		if (is_null($object)) {
+			$object = $this;
+			$key = $parts[0];
+			if (!property_exists($object, $key)) array_unshift($parts, 'data');
+		}
+		
+		while (!empty($parts)) {
+			$key = array_shift($parts);
+			if (is_array($object)) {
+				if (!array_key_exists($key, $object)) {
+					$this->log("Alias '" . $alias . "' is not exists");
+					return null;
+				}
+				$object = $object[$key];
+			} elseif (is_object($object)) {
+				$object = $object->$key;
+			} else {
+				return null;
+			}
+		}
+		
+		return $object;
+	}
+	
+	
+	public function processVars(&$string, $object=null) {
+		$string = preg_replace_callback('@\[\[\+([a-z0-9\._]+)\]\]@i', function($matches) use ($object) {
+			return RK::self()->getAlias($matches[1], $object);
+		}, $string);
+	}
+	
+	
 	public function __get($key) {
 		return $this->data->get($key);
 	}
@@ -186,7 +221,9 @@ class RK {
 	public function output() {
 		// >> process tags: [[+request.uri]] ...
 		$output = ob_get_clean();
-		$output = str_replace('[[+version]]', $this->info['version'], $output);
+		
+		$this->processVars($output, $this);
+		
 		echo $output;
 	}
 	
