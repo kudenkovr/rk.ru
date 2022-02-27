@@ -6,6 +6,11 @@
 </head>
 
 <body>
-	<div>[[+content]]</div>
+	<div>
+[[foreach (list as page)]]
+	#[[+page.id]]: [[+page.title]]
+[[endforeach]]
+[[+content]]
+	</div>
 </body>
 </html>

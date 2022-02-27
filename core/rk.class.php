@@ -64,7 +64,9 @@ class RK {
 	
 	public function processVars(&$string, $object=null) {
 		$string = preg_replace_callback('@\[\[\+([a-z0-9\._]+)\]\]@i', function($matches) use ($object) {
-			return RK::self()->getAlias($matches[1], $object);
+			$var = RK::self()->getAlias($matches[1], $object);
+			if (is_null($var)) return $matches[0];
+			return $var;
 		}, $string);
 	}
 	
