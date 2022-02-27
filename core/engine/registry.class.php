@@ -4,6 +4,16 @@ namespace Engine;
 
 class Registry {
 	
+	public function get($key) {
+		$getter = 'get' . ucfirst(strtolower($key));
+		if (method_exists($this, $getter)) {
+			return $this->$getter();
+		} elseif ($this->has($key)) {
+			return $this->$key;
+		} else return null;
+	}
+	
+	
 	public function set($key, $value=null) {
 		if (is_null($value) && is_array($key)) {
 			$this->_setArray($key);
@@ -33,13 +43,8 @@ class Registry {
 	}
 	
 	
-	public function get($key) {
-		$getter = 'get' . ucfirst(strtolower($key));
-		if (method_exists($this, $getter)) {
-			return $this->$getter();
-		} elseif ($this->has($key)) {
-			return $this->$key;
-		} else return null;
+	public function has($key) {
+		return property_exists($this, $key);
 	}
 	
 	
@@ -48,8 +53,13 @@ class Registry {
 	}
 	
 	
-	public function has($key) {
-		return property_exists($this, $key);
+	public function __set($key, $value) {
+		return $this->set($key, $value);
+	}
+	
+	
+	public function __isset($key) {
+		return $this->has($key);
 	}
 	
 	

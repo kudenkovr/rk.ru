@@ -9,7 +9,7 @@ RewriteBase /
 # RewriteCond %{SERVER_PORT} !^443$
 # RewriteRule .* https://%{SERVER_NAME}%{REQUEST_URI} [R=301,L]
 
-# Rewrite www.domain.com -> domain.com -- used with SEO Strict URLs plugin
+# Rewrite www.domain.com -> domain.com
 # RewriteCond %{HTTP_HOST} ^www.domain.com$ [NC]
 # RewriteRule ^(.*)$ https://domain.com/$1 [R=301,L]
 

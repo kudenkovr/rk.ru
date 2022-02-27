@@ -7,8 +7,7 @@ class Path {
 	
 	
 	public function normalize($path) {
-		$path = str_replace('/', DIRECTORY_SEPARATOR, $path);
-		$path = str_replace('\\', DIRECTORY_SEPARATOR, $path);
+		$path = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path);
 		$path = rtrim($path, DIRECTORY_SEPARATOR);
 		if (is_dir($path)) $path .= DIRECTORY_SEPARATOR;
 		return $path;
@@ -34,13 +33,13 @@ class Path {
 					array_unshift($this->_data[$key], $path);
 				}
 			} else {
-				// trigger_error("Directory \"$path\" is not exists", E_USER_WARNING);
+				trigger_error("Directory or file \"$path\" is not exists", E_USER_WARNING);
 			}
 		}
 	}
 	
 	
-	public function &get($key) {
+	public function get($key) {
 		if (array_key_exists($key, $this->_data)) {
 			foreach ($this->_data[$key] as $path) {
 				if (is_dir($path)) return $path;
@@ -49,23 +48,26 @@ class Path {
 	}
 	
 	
-	public function getFilename($path_key, $file_name) {
+	public function getFilename($path_key, $file_name=null) {
+		if (is_null($file_name)) {
+			$file_name = $path_key;
+			$path_key = '';
+		}
 		if (array_key_exists($path_key, $this->_data)) {
 			foreach ($this->_data[$path_key] as $path) {
 				$file_path = $this->normalize($path . $file_name);
-				// echo $file_path . PHP_EOL; 
 				if (file_exists($file_path)) {
 					return $file_path;
 				}
 			}
 		}
-		// from $rk->path->core:
-		$file_path = $this->normalize($this->get('core') . $file_name);
+		// FIX: loading file from $rk->path->core:
+		$file_path = $this->get('core') . $file_name;
 		if (file_exists($file_path)) {
 			return $file_path;
 		}
-		// from $rk->path->base:
-		$file_path = $this->normalize($this->get('base') . $file_name);
+		// FIX: loading file from $rk->path->base:
+		$file_path = $this->get('base') . $file_name;
 		if (file_exists($file_path)) {
 			return $file_path;
 		}
