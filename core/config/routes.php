@@ -1,10 +1,6 @@
 <?php
 $_[] = [
-	'rule' => '/',
-	'action' => 'page/index',
-];
-$_[] = [
-	'rule' => '[^/]+',
+	'rule' => '.*',
 	'action' => 'page/index',
 ];
 $_[] = [

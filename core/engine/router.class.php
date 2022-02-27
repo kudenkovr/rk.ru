@@ -6,15 +6,14 @@ use RK;
 class Router extends Model {
 	
 	public function route($routes) {
-		$uri = trim(RK::self()->request->uri, '/');
-		if (empty($uri)) $uri = '/';
+		$uri = RK::self()->alias('request.uri');
 		foreach($routes as $route) {
 			$rule = $route['rule'];
 			$action = $route['action'];
 			$data = array();
 			
 			// Check ajax queries
-			if (array_key_exists('ajax', $route) && $route['ajax'] != RK::self()->request->is_ajax) continue;
+			if (array_key_exists('ajax', $route) && $route['ajax'] != RK::self()->alias('request.is_ajax')) continue;
 			
 			// Check $_GET, $_POST, $_REQUEST
 			$next = false;
@@ -74,12 +73,6 @@ class Router extends Model {
 				break;
 			}
 		}
-		return $this->route($routes);
-	}
-	
-	
-	public function routeDB() {
-		$routes = $this->select('SELECT rule, action FROM rk_routes ORDER BY priority ASC');
 		return $this->route($routes);
 	}
 	

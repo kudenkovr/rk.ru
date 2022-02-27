@@ -18,12 +18,12 @@ class Controller {
 	
 	public function setView($spirit) {
 		$rk = RK::self();
-		$file = $rk->path->getFilename('view', $spirit . $rk->config->ext['view']);
+		$file = $rk->path->getFilename('view', $spirit . $rk->alias('config.ext.view'));
 		if (file_exists($file)) {
-			$class = 'View\\' . str_replace($namesep, '\\', $spirit);
+			$class = 'View\\' . str_replace($rk->alias('config.namesep'), '\\', $spirit);
 			require_once $file;
 		} else {
-			$class = $rk->config->default['view'];
+			$class = $rk->alias('config.default.view');
 		}
 		$this->view = new $class();
 	}
@@ -31,15 +31,8 @@ class Controller {
 	
 	public function setModel($spirit, $data=array()) {
 		$rk = RK::self();
-		$file = $rk->path->getFilename('model', $spirit . $rk->config->ext['model']);
-		if (file_exists($file)) {
-			$class = 'Model\\' . str_replace($rk->config->default['namesep'], '\\', $spirit);
-			require_once $file;
-		} else {
-			$class = $rk->config->default['model'];
-		}
-		$this->model = new $class;
-		$this->model->set($data);
+		
+		$this->model = RK::self()->getModel($spirit, $data);
 		
 		if (is_object($this->view)) {
 			$this->view->model = $this->model;
@@ -50,15 +43,5 @@ class Controller {
 	public function output() {
 		echo $this->view->render();
 	}
-	
-	
-	/* 
-	public function get($key) {
-		if ($this->model->has($key)) {
-			return $this->model->get($key);
-		} else {
-			return $this->rk->get($key);
-		}
-	} */
 	
 }

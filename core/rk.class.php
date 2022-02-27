@@ -3,38 +3,29 @@ class RK {
 	const DIRSEP = DIRECTORY_SEPARATOR;
 	const NAMESEP = '/';
 	protected static $_self;
-	// protected $_data;
 	public $data;
 	public $config;
 	public $path;
 	public $request;
 	public $router;
 	public $db;
-	protected $_log = array();
 	
 	public function __construct($path_base=null) {
-		
 		RK::$_self = $this;
-		$this->data = new Engine\Registry;
 		
+		$this->data = new Engine\Registry;
 		$this->path = new Engine\Path;
 		$this->config = new Engine\Registry;
 		$this->request = new Engine\Request;
 		$this->router = new Engine\Router;
 		
-		
-		// file_put_contents($this->path->core . 'log.txt', '');
-		
-		$this->log('Start RK Light');
 		ob_start();
 	}
 	
 	public static function self() { return RK::$_self; }
-	// alias
-	public static function _() { return RK::$_self; }
 	
 	
-	public function getAlias($alias, $object = null) {
+	public function alias($alias, $object = null) {
 		$parts = (is_string($alias)) ? explode('.', $alias) : $alias;
 		
 		if (is_null($object)) {
@@ -47,7 +38,7 @@ class RK {
 			$key = array_shift($parts);
 			if (is_array($object)) {
 				if (!array_key_exists($key, $object)) {
-					$this->log("Alias '" . $alias . "' is not exists");
+					trigger_error("Alias '" . $alias . "' is not exists", E_USER_NOTICE);
 					return null;
 				}
 				$object = $object[$key];
@@ -64,7 +55,7 @@ class RK {
 	
 	public function processVars(&$string, $object=null) {
 		$string = preg_replace_callback('@\[\[\+([a-z0-9\._]+)\]\]@i', function($matches) use ($object) {
-			$var = RK::self()->getAlias($matches[1], $object);
+			$var = RK::self()->alias($matches[1], $object);
 			if (is_null($var)) return $matches[0];
 			return $var;
 		}, $string);
@@ -75,37 +66,22 @@ class RK {
 		return $this->data->get($key);
 	}
 	
+	
 	public function __set($key, $value) {
 		return $this->data->set($key, $value);
 	}
 	
+	
 	public function __isset($key) {
 		return $this->data->has($key);
 	}
-	
-	public function __toString() {
-		return $this->title . ' v' . $this->version;
-	}
-	
-	
-	public function log($string) {
-		array_push($this->_log, '[' . date("Y-m-d H:i:s") . '] ' . $string);
-	}
-	
-	
-	public function getJSLog() {
-		$output = '<script>' . PHP_EOL;
-		foreach ($this->_log as $msg) $output .= '	console.info("' . $msg . '");' . PHP_EOL;
-		$output .= '</script>' . PHP_EOL;
-		return $output;
-	}	
 	
 	
 	public function getConfig($filename, $assoc=true) {
 		$ext = pathinfo($filename, PATHINFO_EXTENSION);
 		$config_file = $this->path->getFilename('config', $filename);
 		if (empty($config_file)) {
-			trigger_error('Config file not found "'. $filename .'"', E_USER_WARNING);
+			trigger_error('Config file "'. $filename . '" not found', E_USER_WARNING);
 			return array();
 		}
 		$_ = array();
@@ -126,13 +102,18 @@ class RK {
 	}
 	
 	
-	public function loadConfig($filename, $var='config') {
+	public function loadConfig($var, $filename=null) {
+		if (is_null($filename)) {
+			$filename = $var;
+			$var = 'config';
+		}
+		if (!property_exists($this, $var)) return false;
 		$this->$var->set($this->getConfig($filename));
 	}
 	
 	
 	public function connectDB($config=null) {
-		if (empty($config)) $config = $this->config->mysql;
+		if (empty($config)) $config = $this->alias('config.mysql');
 		extract($config);
 		$this->db = new MySQLi($host, $login, $password, $database);
 		if ($this->db->connect_errno) {
@@ -145,17 +126,19 @@ class RK {
 	
 	
 	public function invoke($spirit, $data=array()) {
-		$namesep = $this->config->default['namesep'];
+		$namesep = $this->alias('config.namesep');
 		
 		// load Controller
-		$file = $this->path->getFilename('controller', $spirit . $this->config->ext['controller']);
+		$file = $this->path->getFilename('controller', $spirit . $this->alias('config.ext.controller'));
 		if (!file_exists($file)) return false;
 		require_once $file;
 		$class = 'Controller\\' . str_replace($namesep, '\\', $spirit);
 		$controller = new $class;
 		
-		// load Model
+		// load View
 		$controller->setView($spirit);
+		
+		// load Model
 		$controller->setModel($spirit, $data);
 		
 		// load Template
@@ -164,28 +147,30 @@ class RK {
 		return $controller;
 	}
 	
-	
-	// (new Controller\spirit_name)->run($spirit_controller_action)
-	// $rk->run([spirit_name]/[spirit_controller_action])
+	// Get Controller by spirit and execute action
+	// call = [spirit]/[action] >> Controller\[spirit]->action.[Action]($data)
 	public function run($call, $data=array()) {
-		// Rip Action
-		$pos = strrpos($call, $this->config->default['namesep']);
+		// Get Action name
+		$pos = strrpos($call, $this->alias('config.namesep'));
 		if ($pos !== false) {
 			$spirit = substr($call, 0, $pos);
 			$action = substr($call, $pos+1);
 		} else {
 			$spirit = $call;
-			$action = $this->config->default['action'];
+			$action = $this->alias('config.default.action');
 		}
-		// echo "$call: {$spirit}->{$action}();";exit;
 		
 		// invoke
 		$controller = $this->invoke($spirit, $data);
 		
 		// check for exists file and non-action call
 		if ($controller === false) {
-			if ($action == $this->config->default['action']) return $this->log("Action \"$action\" is not valid");
-			else return $this->run($call . '/' . $this->config->default['action'], $data);
+			if ($action == $this->alias('config.default.action')) {
+				trigger_error("Action \"$action\" is not valid", E_USER_ERROR);
+				return false;
+			} else {
+				return $this->run($call . '/' . $this->alias('config.default.action'), $data);
+			}
 		}
 		
 		return $controller->run($action, $data);
@@ -193,37 +178,28 @@ class RK {
 	}
 	
 	
-	public function getModel($name) {
-		$rk_class = get_called_class();
-		$file = $this->path->getFilename('model', $name . $this->config->ext['model']);
-		$class = 'Model\\' . str_replace($rk_class::NAMESEP, '\\', $name);
-		// die($name . ' || ' . $class . ' || ' . $name . $this->config->ext['model'] . ' || ' . $file);
-		if (!file_exists($file)) {
-			trigger_error("Model $name not found in \"$file\" ($class)", E_USER_WARNING);
-			return new Engine\Model;
+	public function getModel($spirit, $data=array()) {
+		$file = $this->path->getFilename('model', $spirit . $this->alias('config.ext.model'));
+		
+		if (file_exists($file)) {
+			$class = 'Model\\' . str_replace($this->alias('config.namesep'), '\\', $spirit);
+			require_once $file;
+		} else {
+			trigger_error("Model \"{$spirit}\" is not exists. Replacing by default model", E_USER_WARNING);
+			$class = $this->alias('config.default.model');
 		}
-		require_once($file);
-		return new $class;
+		
+		$model = new $class;
+		$model->set($data);
+		
+		return $model;
 	}
 	
 	
-	/* public function getModule($name) {
-		$rk_class = get_called_class();
-		$file = $this->path->getFilename('module', $name . $this->config->ext_class);
-		$class = 'Module\\' . str_replace($rk_class::NAMESEP, '\\', $name);
-		if (!file_exists($file)) {
-			trigger_error("Module $name not found in \"$file\" ($class)", E_USER_WARNING);
-			return;
-		}
-		require_once($file);
-		return new $class;
-	} */
-	
-	
 	public function output() {
-		// >> process tags: [[+request.uri]] ...
 		$output = ob_get_clean();
 		
+		// >> process aliases: [[+request.uri]] etc.
 		$this->processVars($output, $this);
 		
 		echo $output;
