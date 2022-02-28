@@ -10,8 +10,7 @@ class View {
 	
 	public function setTemplate($spirit) {
 		$rk = RK::self();
-		$ext = $rk->alias('config.ext.template');
-		return $this->_template = $rk->path->getFilename('template', $spirit . $ext);
+		return $this->_template = $rk->path->getFilePath($spirit, 'template');
 	}
 	
 	

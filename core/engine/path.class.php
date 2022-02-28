@@ -1,5 +1,6 @@
 <?php
 namespace Engine;
+use RK;
 
 
 class Path {
@@ -48,11 +49,12 @@ class Path {
 	}
 	
 	
-	public function getFilename($path_key, $file_name=null) {
-		if (is_null($file_name)) {
-			$file_name = $path_key;
-			$path_key = '';
+	public function getFilePath($file_name, $path_key='config') {
+		$rk = RK::self();
+		if ($rk->config->has('ext') && array_key_exists($path_key, $rk->config->ext)) {
+			$file_name .= (string) $rk->alias("config.ext.$path_key");
 		}
+		
 		if (array_key_exists($path_key, $this->_data)) {
 			foreach ($this->_data[$path_key] as $path) {
 				$file_path = $this->normalize($path . $file_name);
