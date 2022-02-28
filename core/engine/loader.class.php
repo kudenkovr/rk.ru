@@ -2,26 +2,7 @@
 namespace Engine;
 use RK;
 
-class Invoker {
-	public function spirit($spirit, $data=array()) {
-		$rk = RK::self();
-		
-		// load Controller
-		$controller = $this->controller($spirit);
-		
-		// load Model
-		$controller->setModel($spirit, $data);
-		
-		// load View
-		$controller->setView($spirit);
-		
-		// load Template
-		$controller->view->setTemplate($spirit);
-		
-		return $controller;
-	}
-	
-	
+class Loader {
 	
 	public function file($name) {
 		$file = RK::self()->path->getFilePath($name);
@@ -32,16 +13,16 @@ class Invoker {
 	
 	
 	
-	public function controller($spirit) {
+	public function controller($name) {
 		$rk = RK::self();
 		
-		$file = $rk->path->getFilePath($spirit, 'controller');
+		$file = $rk->path->getFilePath($name, 'controller');
 		
 		if (file_exists($file)) {
-			$class = 'Controller\\' . str_replace($rk->alias('config.namesep'), '\\', $spirit);
+			$class = 'Controller\\' . str_replace($rk->alias('config.namesep'), '\\', $name);
 			require_once $file;
 		} else {
-			trigger_error("Controller \"{$spirit}{$ext}\" is not exists", E_USER_ERROR);
+			trigger_error("Controller \"{$name}{$ext}\" is not exists", E_USER_ERROR);
 			return false;
 		}
 		
@@ -50,16 +31,16 @@ class Invoker {
 	
 	
 	
-	public function model($spirit, $data=array()) {
+	public function model($name, $data=array()) {
 		$rk = RK::self();
 		
-		$file = $rk->path->getFilePath($spirit, 'model');
+		$file = $rk->path->getFilePath($name, 'model');
 		
 		if (file_exists($file)) {
-			$class = 'Model\\' . str_replace($rk->alias('config.namesep'), '\\', $spirit);
+			$class = 'Model\\' . str_replace($rk->alias('config.namesep'), '\\', $name);
 			require_once $file;
 		} else {
-			trigger_error("Model \"{$spirit}\" is not exists. Replacing by default model", E_USER_WARNING);
+			trigger_error("Model \"{$name}\" is not exists. Replacing by default model", E_USER_WARNING);
 			$class = $rk->alias('config.default.model');
 		}
 		
@@ -70,11 +51,11 @@ class Invoker {
 	}
 	
 	
-	public function view($spirit) {
+	public function view($name) {
 		$rk = RK::self();
-		$file = $rk->path->getFilePath($spirit, 'view');
+		$file = $rk->path->getFilePath($name, 'view');
 		if (file_exists($file)) {
-			$class = 'View\\' . str_replace($rk->alias('config.namesep'), '\\', $spirit);
+			$class = 'View\\' . str_replace($rk->alias('config.namesep'), '\\', $name);
 			require_once $file;
 		} else {
 			$class = $rk->alias('config.default.view');

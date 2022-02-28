@@ -16,7 +16,7 @@ class RK extends Engine\Model {
 		$this->data = new Engine\Registry;
 		$this->path = new Engine\Path;
 		$this->config = new Engine\Registry;
-		$this->load = new Engine\Invoker;
+		$this->load = new Engine\Loader;
 		$this->request = new Engine\Request;
 		$this->router = new Engine\Router;
 		
@@ -42,20 +42,20 @@ class RK extends Engine\Model {
 	
 	// refactoring with Invoker
 	// Get Controller by spirit and execute action
-	// call = [spirit]/[action] >> Controller\[spirit]->action.[Action]($data)
+	// call = [controller]/[action] >> Controller\[controller]->action.[Action]($data)
 	public function run($call, $data=array()) {
 		// Get Action name
 		$pos = strrpos($call, $this->alias('config.namesep'));
 		if ($pos !== false) {
-			$spirit = substr($call, 0, $pos);
+			$controller = substr($call, 0, $pos);
 			$action = substr($call, $pos+1);
 		} else {
-			$spirit = $call;
+			$controller = $call;
 			$action = $this->alias('config.default.action');
 		}
 		
 		// invoke
-		$controller = $this->load->spirit($spirit, $data);
+		$controller = $this->load->controller($controller);
 		
 		// check for exists file and non-action call
 		if ($controller === false) {
@@ -72,7 +72,7 @@ class RK extends Engine\Model {
 	}
 	
 	
-	// >> to View
+	// >> to View ??
 	public function output() {
 		$output = ob_get_clean();
 		

@@ -61,7 +61,7 @@ class Registry {
 			$object = $this;
 		}
 		
-		if (!property_exists($object, $parts[0]) && property_exists($object, 'data')) {
+		if (is_object($object) && !property_exists($object, $parts[0]) && property_exists($object, 'data')) {
 			array_unshift($parts, 'data');
 		}
 		
@@ -69,14 +69,14 @@ class Registry {
 			$key = array_shift($parts);
 			if (is_array($object)) {
 				if (!array_key_exists($key, $object)) {
-					trigger_error("Alias '" . $alias . "' is not exists", E_USER_NOTICE);
-					return null;
+					// trigger_error("Alias '" . $alias . "' is not exists", E_USER_NOTICE);
+					return '[[+' . $alias . ']]';
 				}
 				$object = $object[$key];
 			} elseif (is_object($object)) {
 				$object = $object->$key;
 			} else {
-				return null;
+				return '[[+' . $alias . ']]';
 			}
 		}
 		
