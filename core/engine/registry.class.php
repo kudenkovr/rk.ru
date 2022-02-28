@@ -1,5 +1,6 @@
 <?php
 namespace Engine;
+use RK;
 
 
 class Registry {
@@ -36,6 +37,11 @@ class Registry {
 	}
 	
 	
+	public function has($key) {
+		return property_exists($this, $key);
+	}
+	
+	
 	protected function _setArray($data) {
 		foreach($data as $k=>$v) {
 			$this->set($k, $v);
@@ -43,8 +49,48 @@ class Registry {
 	}
 	
 	
-	public function has($key) {
-		return property_exists($this, $key);
+	public function toArray() {
+		return (array) $this;
+	}
+	
+	
+	public function alias($alias, $object = null) {
+		$parts = (is_string($alias)) ? explode('.', $alias) : $alias;
+		
+		if (is_null($object)) {
+			$object = $this;
+		}
+		
+		if (!property_exists($object, $parts[0]) && property_exists($object, 'data')) {
+			array_unshift($parts, 'data');
+		}
+		
+		while (!empty($parts)) {
+			$key = array_shift($parts);
+			if (is_array($object)) {
+				if (!array_key_exists($key, $object)) {
+					trigger_error("Alias '" . $alias . "' is not exists", E_USER_NOTICE);
+					return null;
+				}
+				$object = $object[$key];
+			} elseif (is_object($object)) {
+				$object = $object->$key;
+			} else {
+				return null;
+			}
+		}
+		
+		return $object;
+	}
+	
+	
+	
+	public function processVars(&$string, $object=null) {
+		$string = preg_replace_callback('@\[\[\+([a-z0-9\._]+)\]\]@i', function($matches) use ($object) {
+			$var = RK::self()->alias($matches[1], $object);
+			if (is_null($var)) return $matches[0];
+			return $var;
+		}, $string);
 	}
 	
 	
@@ -60,11 +106,6 @@ class Registry {
 	
 	public function __isset($key) {
 		return $this->has($key);
-	}
-	
-	
-	public function toArray() {
-		return (array) $this;
 	}
 	
 }

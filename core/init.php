@@ -19,9 +19,9 @@ $rk->path->set('base', $_SERVER['DOCUMENT_ROOT']);
 $rk->path->set('core', __DIR__);
 
 
-$rk->loadConfig('path', 'paths.php');
-$rk->loadConfig('config.ini'); // 'config' is default property
-$rk->loadConfig('mysql.ini'); // 'config' is default property
-$rk->loadConfig('data', 'info.ini');
+$rk->load->config('path', 'paths.php');
+$rk->load->config('config.ini'); // 'config' is default property
+$rk->load->config('mysql.ini'); // 'config' is default property
+$rk->load->config('data', 'info.ini');
 
 $rk->connectDB();
