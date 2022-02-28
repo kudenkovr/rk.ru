@@ -16,24 +16,19 @@ class Controller {
 	}
 	
 	
-	public function setView($spirit) {
-		$this->view = RK::self()->load->view($spirit);
+	public function setView($name) {
+		$this->view = RK::self()->load->view($name);
 		if (is_object($this->model)) {
 			$this->view->model = $this->model;
 		}
 	}
 	
 	
-	public function setModel($spirit, $data=array()) {
-		$this->model = RK::self()->load->model($spirit, $data);
+	public function setModel($name, $data=array()) {
+		$this->model = RK::self()->load->model($name, $data);
 		if (is_object($this->view)) {
 			$this->view->model = $this->model;
 		}
-	}
-	
-	
-	public function output() {
-		echo $this->view->render();
 	}
 	
 }
