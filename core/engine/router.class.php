@@ -62,7 +62,7 @@ class Router extends Model {
 	
 	
 	public function routeFile($file) {
-		$config = RK::self()->getConfig($file);
+		$config = RK::self()->load->config($file, false);
 		$routes = array();
 		foreach($config as $rule => $action) {
 			if (is_string($action)) {

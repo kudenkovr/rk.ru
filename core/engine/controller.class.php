@@ -16,32 +16,19 @@ class Controller {
 	}
 	
 	
-	public function setView($spirit) {
-		$rk = RK::self();
-		$file = $rk->path->getFilename('view', $spirit . $rk->alias('config.ext.view'));
-		if (file_exists($file)) {
-			$class = 'View\\' . str_replace($rk->alias('config.namesep'), '\\', $spirit);
-			require_once $file;
-		} else {
-			$class = $rk->alias('config.default.view');
-		}
-		$this->view = new $class();
-	}
-	
-	
-	public function setModel($spirit, $data=array()) {
-		$rk = RK::self();
-		
-		$this->model = RK::self()->getModel($spirit, $data);
-		
-		if (is_object($this->view)) {
+	public function setView($name) {
+		$this->view = RK::self()->load->view($name);
+		if (is_object($this->model)) {
 			$this->view->model = $this->model;
 		}
 	}
 	
 	
-	public function output() {
-		echo $this->view->render();
+	public function setModel($name, $data=array()) {
+		$this->model = RK::self()->load->model($name, $data);
+		if (is_object($this->view)) {
+			$this->view->model = $this->model;
+		}
 	}
 	
 }
