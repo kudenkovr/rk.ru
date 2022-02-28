@@ -50,7 +50,6 @@ class Path {
 	
 	
 	public function getFilePath($file_name, $path_key='config') {
-		// print_r(RK::self()->config);exit;
 		$rk = RK::self();
 		if ($rk->config->has('ext') && array_key_exists($path_key, $rk->config->ext)) {
 			$file_name .= (string) $rk->alias("config.ext.$path_key");
