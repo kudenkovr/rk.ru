@@ -23,11 +23,19 @@ class Invoker {
 	
 	
 	
+	public function file($name) {
+		$file = RK::self()->path->getFilePath($name);
+		if (file_exists($file)) {
+			return file_get_contents($file);
+		}
+	}
+	
+	
+	
 	public function controller($spirit) {
 		$rk = RK::self();
 		
-		$ext = $rk->alias('config.ext.controller');
-		$file = $rk->path->getFilename('controller', $spirit . $ext);
+		$file = $rk->path->getFilePath($spirit, 'controller');
 		
 		if (file_exists($file)) {
 			$class = 'Controller\\' . str_replace($rk->alias('config.namesep'), '\\', $spirit);
@@ -45,7 +53,7 @@ class Invoker {
 	public function model($spirit, $data=array()) {
 		$rk = RK::self();
 		
-		$file = $rk->path->getFilename('model', $spirit . $rk->alias('config.ext.model'));
+		$file = $rk->path->getFilePath($spirit, 'model');
 		
 		if (file_exists($file)) {
 			$class = 'Model\\' . str_replace($rk->alias('config.namesep'), '\\', $spirit);
@@ -64,7 +72,7 @@ class Invoker {
 	
 	public function view($spirit) {
 		$rk = RK::self();
-		$file = $rk->path->getFilename('view', $spirit . $rk->alias('config.ext.view'));
+		$file = $rk->path->getFilePath($spirit, 'view');
 		if (file_exists($file)) {
 			$class = 'View\\' . str_replace($rk->alias('config.namesep'), '\\', $spirit);
 			require_once $file;
@@ -76,32 +84,30 @@ class Invoker {
 	
 	
 	
-	public function config($var, $filename=null) {
+	public function config($filename, $var='config') {
 		$rk = RK::self();
-		if (is_null($filename)) {
-			$filename = $var;
-			$var = 'config';
-		}
 		$ext = pathinfo($filename, PATHINFO_EXTENSION);
-		$config_file = $rk->path->getFilename('config', $filename);
-		if (empty($config_file)) {
-			trigger_error('Config file "'. $filename . '" not found', E_USER_WARNING);
+		$file = $rk->path->getFilePath($filename, 'config');
+		if (empty($file)) {
+			trigger_error('Config file "'. $file . '" not found', E_USER_WARNING);
 			return array();
 		}
 		$_ = array();
 		switch($ext) {
 			case 'php':
-				$return = include($config_file);
+				$return = include($file);
 				if (is_array($return)) $_ = $return;
 				break;
 			case 'ini':
-				$_ = parse_ini_file($config_file, true);
+				$_ = parse_ini_file($file, true);
 				break;
 			case 'json':
-				$_ = json_decode($config_file, true);
+				$_ = json_decode($file, true);
 				break;
 		}
-		if (property_exists($rk, $var)) $rk->$var->set($_);
+		if (property_exists($rk, $var)) {
+			$rk->$var->set($_);
+		}
 		return $_;
 	}
 }
