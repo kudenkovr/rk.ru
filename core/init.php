@@ -5,6 +5,14 @@ session_start();
 
 
 function rk_autoloader($class_name) {
+	if (class_exists('RK') && !is_null(RK::self())) {
+		$parts = explode('\\', $class_name);
+		$path_key = strtolower(array_shift($parts));
+		$name = implode(RK::self()->alias('config.namesep'), $parts);
+		if (method_exists(RK::self()->load, $path_key)) {
+			RK::self()->load->$path_key($name);
+		}
+	}
 	$file_path = __DIR__ . DIRECTORY_SEPARATOR . strtolower($class_name) . '.class.php';
 	if (!file_exists($file_path)) return false;
 	require_once($file_path);
